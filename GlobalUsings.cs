@@ -26,9 +26,6 @@ global using Osmi;
 global using Osmi.Game;
 global using Osmi.Utils;
 
-global using Satchel;
-global using Satchel.Futils;
-
 global using UnityEngine;
 global using UnityEngine.EventSystems;
 global using UnityEngine.SceneManagement;

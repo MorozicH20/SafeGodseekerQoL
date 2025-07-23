@@ -79,7 +79,8 @@ namespace SafeGodseekerQoL.Settings
         internal IEnumerable<Element> GetMenuElements(string category)
         {
             List<Element> options = [];
-            string descPrefix = "BelongsToModule";
+            string descPrefix = "BelongsToModule".Localize();
+
 
             if (this.boolFields.TryGetValue(category, out Dictionary<string, SettingInfo<bool>> boolFields))
             {
@@ -89,10 +90,9 @@ namespace SafeGodseekerQoL.Settings
                     {
                         continue;
                     }
-
                     options.Add(Blueprints.HorizontalBoolOption(
-                        $"Settings/{name}",
-                        descPrefix + $"Modules/{fi.DeclaringType.Name}",
+                        $"Settings/{name}".Localize(),
+					descPrefix + $"Modules/{fi.DeclaringType.Name}".Localize(),
                         setter,
                         getter
                     ));
@@ -111,14 +111,14 @@ namespace SafeGodseekerQoL.Settings
                     options.Add(attr.Type switch
                     {
                         OptionType.Option => Blueprints.GenericHorizontalOption(
-                            $"Settings/{name}",
+                            $"Settings/{name}".Localize(),
                             descPrefix + $"Modules/{fi.DeclaringType.Name}",
                             attr.Options,
                             setter,
                             getter
                         ),
                         OptionType.Slider => new CustomSlider(
-                            $"Settings/{name}",
+                            $"Settings/{name}".Localize(),
                             (val) => setter((int)val),
                             () => getter(),
                             attr.Options.First(),
@@ -142,14 +142,14 @@ namespace SafeGodseekerQoL.Settings
                     options.Add(attr.Type switch
                     {
                         OptionType.Option => Blueprints.GenericHorizontalOption(
-                            $"Settings/{name}",
-                            descPrefix + $"Modules/{fi.DeclaringType.Name}",
+                            $"Settings/{name}".Localize(),
+                            descPrefix + $"Modules/{fi.DeclaringType.Name}".Localize(),
                             attr.Options,
                             setter,
                             getter
                         ),
                         OptionType.Slider => new CustomSlider(
-                            $"Settings/{name}",
+                            $"Settings/{name}".Localize(),
                             (val) => setter((int)val),
                             () => getter(),
                             attr.Options.First(),
@@ -171,8 +171,8 @@ namespace SafeGodseekerQoL.Settings
                     }
 
                     options.Add(Blueprints.GenericHorizontalOption(
-                        $"Settings/{name}",
-                        descPrefix + $"Modules/{fi.DeclaringType.Name}",
+                        $"Settings/{name}".Localize(),
+                        descPrefix + $"Modules/{fi.DeclaringType.Name}".Localize(),
                         [..Enum.GetValues(fi.FieldType).Cast<object>()
                         .Map((val) => new EnumWrapper(name, fi.FieldType, val))
                         ],
@@ -193,6 +193,10 @@ namespace SafeGodseekerQoL.Settings
             .Map(fi =>
             {
                 _ = ModuleManager.TryGetModule(fi.DeclaringType, out Module? module);
+                if (module == null)
+                {
+                    Modding.Logger.LogError($"Module not found for field {fi.Name} in type {fi.DeclaringType.FullName}");
+                }
                 return (module!, fi);
             })
             .Map((tuple) =>
@@ -255,7 +259,7 @@ namespace SafeGodseekerQoL.Settings
             // This is unused, just for suppressing the warning.
             public override int GetHashCode() => Value.GetHashCode();
 
-            public override string ToString() => $"Settings/{Name}/{Variant}";
+            public override string ToString() => $"Settings/{Name}/{Variant}".Localize();
 
             string IFormattable.ToString(string format, IFormatProvider formatProvider) => ToString();
         }

@@ -12,7 +12,7 @@ namespace SafeGodseekerQoL
 
         public override string GetVersion() => ModInfo.Version;
         public override string GetMenuButtonText() =>
-        "ModName" + ' ' + Lang.Get("MAIN_OPTIONS", "MainMenu");
+        "ModName".Localize() + ' ' + Lang.Get("MAIN_OPTIONS", "MainMenu");
         static SafeGodseekerQoL()
         {
             try

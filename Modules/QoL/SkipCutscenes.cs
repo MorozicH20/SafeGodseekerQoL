@@ -1,6 +1,6 @@
 ﻿using Vasi;
 using static UnityEngine.UI.GridLayoutGroup;
-
+using Random = UnityEngine.Random;
 
 namespace SafeGodseekerQoL.Modules.QoL
 {
@@ -48,6 +48,10 @@ namespace SafeGodseekerQoL.Modules.QoL
 
         [GlobalSetting]
         [BoolOption]
+        public static bool GrimmNightmare = true;
+
+        [GlobalSetting]
+        [BoolOption]
         public static bool FirstTimeBosses = true;
 
         [GlobalSetting]
@@ -75,6 +79,9 @@ namespace SafeGodseekerQoL.Modules.QoL
         public static bool SoulMasterPhaseTransitionSkip = true;
 
         #endregion
+        public override bool DefaultEnabled => true;
+
+        public override ToggleableLevel ToggleableLevel => ToggleableLevel.ChangeScene;
 
         private const string GUARDIAN = "Dream_Guardian_";
 
@@ -105,6 +112,7 @@ namespace SafeGodseekerQoL.Modules.QoL
             (() => DreamersGet, DreamerFsm),
             (() => AbsoluteRadiance, AbsRadSkip),
             (() => PureVesselRoar, HKPrimeSkip),
+            (() => GrimmNightmare, GrimmNightmareSkip),
             (() => HallOfGodsStatues, StatueWait),
             (() => StagArrive, StagCutscene),
             (() => AbyssShriekGet, AbyssShriekPickup),
@@ -112,7 +120,6 @@ namespace SafeGodseekerQoL.Modules.QoL
             (() => BlackEggOpen, BlackEgg)
         };
 
-        // Boss cutscenes
         private static readonly string[] PD_BOOLS =
         {
             nameof(PlayerData.unchainedHollowKnight),
@@ -182,8 +189,6 @@ namespace SafeGodseekerQoL.Modules.QoL
             orig(self);
         }
 
-        // Skips the "flashing lights cutscene" in the middle of the Soul Master/Tyrant fight
-        // https://github.com/fifty-six/HollowKnight.QoL/issues/31
         private static void MageLordPhaseTransitionSkip(On.GGCheckIfBossScene.orig_OnEnter orig, GGCheckIfBossScene self)
         {
             if (
@@ -224,16 +229,13 @@ namespace SafeGodseekerQoL.Modules.QoL
 
             PlayMakerFSM ctrl = stag.LocateMyFSM("Stag Control");
 
-            // Remove the wait on the stag animation start, and before being able to interact.
-            Vasi.FsmUtil.GetState(ctrl, "Arrive Pause").RemoveAction<Wait>();
-            Vasi.FsmUtil.GetState(ctrl, "Activate").RemoveAction<Wait>();
+            ctrl.GetState("Arrive Pause").RemoveAction<Wait>();
+            ctrl.GetState("Activate").RemoveAction<Wait>();
             var anim = stag.GetComponent<tk2dSpriteAnimator>();
 
-            // Speed up the actual arrival animation.
             anim.GetClipByName("Arrive").fps = 600;
 
-            // Speed up the grate coming up, mostly a thing because of randomizer.
-            GameObject grate = Vasi.FsmUtil.GetState(ctrl, "Open Grate").GetAction<Tk2dPlayAnimationWithEvents>().gameObject.GameObject.Value;
+            GameObject grate = ctrl.GetState("Open Grate").GetAction<Tk2dPlayAnimationWithEvents>().gameObject.GameObject.Value;
 
             if (grate == null)
                 yield break;
@@ -249,9 +251,9 @@ namespace SafeGodseekerQoL.Modules.QoL
 
             foreach (PlayMakerFSM fsm in UObject.FindObjectsOfType<PlayMakerFSM>().Where(x => x.FsmName == "GG Boss UI"))
             {
-                Vasi.FsmUtil.ChangeTransition(Vasi.FsmUtil.GetState(fsm, "On Left"), "FINISHED", "Dream Box Down");
-                Vasi.FsmUtil.ChangeTransition(Vasi.FsmUtil.GetState(fsm, "On Right"), "FINISHED", "Dream Box Down");
-                Vasi.FsmUtil.GetState(fsm, "Dream Box Down").InsertAction(0, fsm.GetAction<SetPlayerDataString>("Impact"));
+                fsm.GetState("On Left").ChangeTransition("FINISHED", "Dream Box Down");
+                fsm.GetState("On Right").ChangeTransition("FINISHED", "Dream Box Down");
+                fsm.GetState("Dream Box Down").InsertAction(0, fsm.GetAction<SetPlayerDataString>("Impact"));
             }
         }
 
@@ -263,13 +265,43 @@ namespace SafeGodseekerQoL.Modules.QoL
 
             PlayMakerFSM control = GameObject.Find("HK Prime").LocateMyFSM("Control");
 
-            Vasi.FsmUtil.ChangeTransition(Vasi.FsmUtil.GetState(control, "Init"), "FINISHED", "Intro Roar");
+            control.GetState("Init").ChangeTransition("FINISHED", "Intro Roar");
 
             control.GetAction<Wait>("Intro 2").time = 0.01f;
             control.GetAction<Wait>("Intro 1").time = 0.01f;
             control.GetAction<Wait>("Intro Roar").time = 1f;
         }
+        private static IEnumerator GrimmNightmareSkip(Scene arg1)
+        {
+            if (arg1.name != "GG_Grimm_Nightmare") yield break;
 
+            yield return null;
+
+            PlayMakerFSM control = GameObject.Find("Grimm Control").LocateMyFSM("Control");
+
+            if (control.gameObject.name == "Grimm Control" && control.FsmName == "Control")
+            {
+                control.GetState("Pause").GetAction<Wait>().time.Value = 0.5f;
+                control.GetState("Pan Over").GetAction<Wait>().time.Value = 0.5f;
+                control.GetState("Eye 1").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Eye 2").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Pan Over 2").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Eye 3").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Eye 4").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Silhouette").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Silhouette 2").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Title Up").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Title Up 2").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Defeated Pause").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Defeated Start").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Explode Start").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Silhouette Up").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Ash Away").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Fade").GetAction<Wait>().time.Value = 0.1f;
+
+            }
+
+        }
         private static IEnumerator AbsRadSkip(Scene arg1)
         {
             if (arg1.name != "GG_Radiance") yield break;
@@ -277,22 +309,22 @@ namespace SafeGodseekerQoL.Modules.QoL
             yield return null;
             try
             {
-            PlayMakerFSM control = GameObject.Find("Boss Control").LocateMyFSM("Control");
+                PlayMakerFSM control = GameObject.Find("Boss Control").LocateMyFSM("Control");
 
-            UObject.Destroy(GameObject.Find("Sun"));
-            UObject.Destroy(GameObject.Find("feather_particles"));
+                UObject.Destroy(GameObject.Find("Sun"));
+                UObject.Destroy(GameObject.Find("feather_particles"));
 
-            FsmState setup = Vasi.FsmUtil.GetState(control, "Setup");
+                FsmState setup = Vasi.FsmUtil.GetState(control, "Setup");
 
-            setup.GetAction<Wait>().time = 1.5f;
-            setup.RemoveAction<SetPlayerDataBool>();
-            //Vasi.FsmUtil.RemoveAction(setup, 3);
-            Vasi.FsmUtil.ChangeTransition(setup, "FINISHED", "Appear Boom");
+                setup.GetAction<Wait>().time = 1.5f;
+                setup.RemoveAction<SetPlayerDataBool>();
+                //Vasi.FsmUtil.RemoveAction(setup, 3);
+                setup.ChangeTransition("FINISHED", "Appear Boom");
 
-            control.GetAction<Wait>("Title Up").time = 1f;
+                control.GetAction<Wait>("Title Up").time = 1f;
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log(ex.Message);
             }
@@ -309,7 +341,7 @@ namespace SafeGodseekerQoL.Modules.QoL
             if (dreamEnter == null)
                 yield break;
 
-            Vasi.FsmUtil.ChangeTransition(Vasi.FsmUtil.GetState(dreamEnter.LocateMyFSM("Control"), "Idle"), "DREAM HIT", "Change Scene");
+            dreamEnter.LocateMyFSM("Control").GetState("Idle").ChangeTransition("DREAM HIT", "Change Scene");
         }
 
         private static IEnumerator AbyssShriekPickup(Scene arg1)
@@ -320,12 +352,10 @@ namespace SafeGodseekerQoL.Modules.QoL
 
             PlayMakerFSM shriek = GameObject.Find("Scream 2 Get").LocateMyFSM("Scream Get");
 
-            Vasi.FsmUtil.ChangeTransition(Vasi.FsmUtil.GetState(shriek, "Move To"), "FINISHED", "Get");
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(shriek, "Get Pause"));
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(shriek, "Land"));
-            //shriek.GetState("Move To").ChangeTransition("FINISHED", "Get");
-            //shriek.GetState("Get Pause").RemoveAllOfType<Wait>();
-            //shriek.GetState("Land").RemoveAllOfType<Wait>();
+            shriek.GetState("Move To").ChangeTransition("FINISHED", "Get");
+            shriek.GetState("Get Pause").RemoveAllOfType<Wait>();
+            shriek.GetState("Land").RemoveAllOfType<Wait>();
+
         }
 
         private static IEnumerator KingsBrand(Scene arg1)
@@ -342,13 +372,11 @@ namespace SafeGodseekerQoL.Modules.QoL
 
             PlayMakerFSM hornet = GameObject.Find("Hornet Blizzard Return Scene").LocateMyFSM("Control");
 
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(hornet, "Fade Pause"));
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(hornet, "Fade In"));
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(hornet, "Land"));
 
-            //hornet.GetState("Fade Pause").RemoveAllOfType<Wait>();
-            //hornet.GetState("Fade In").RemoveAllOfType<Wait>();
-            //hornet.GetState("Land").RemoveAllOfType<Wait>();
+
+            hornet.GetState("Fade Pause").RemoveAllOfType<Wait>();
+            hornet.GetState("Fade In").RemoveAllOfType<Wait>();
+            hornet.GetState("Land").RemoveAllOfType<Wait>();
         }
 
         private static IEnumerator KingsBrandAvalanche(Scene arg1)
@@ -359,9 +387,8 @@ namespace SafeGodseekerQoL.Modules.QoL
 
             PlayMakerFSM avalanche = GameObject.Find("Avalanche End").LocateMyFSM("Control");
 
-            Vasi.FsmUtil.GetAction<Wait>(Vasi.FsmUtil.GetState(avalanche, "Fade")).time = 1;
 
-            //avalanche.GetState("Fade").GetAction<Wait>().time = 1;
+            avalanche.GetState("Fade").GetAction<Wait>().time = 1;
         }
 
         private static IEnumerator BlackEgg(Scene arg1)
@@ -372,22 +399,14 @@ namespace SafeGodseekerQoL.Modules.QoL
 
             PlayMakerFSM door = GameObject.Find("Final Boss Door").LocateMyFSM("Control");
 
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(door, "Take Control"));
-            Vasi.FsmUtil.GetAction<Wait>(Vasi.FsmUtil.GetState(door, "Shake")).time = 1;
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(door, "Barrier Flash"));
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(door, "Blow"));
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(door, "Door Off"));
-            Vasi.FsmUtil.RemoveAllOfType<Wait>(Vasi.FsmUtil.GetState(door, "Roar"));
-            Vasi.FsmUtil.GetAction<Wait>(Vasi.FsmUtil.GetState(door, "Roar End")).time = 1;
 
-
-            //door.GetState("Take Control").RemoveAllOfType<Wait>();
-            //door.GetState("Shake").GetAction<Wait>().time = 1;
-            //door.GetState("Barrier Flash").RemoveAllOfType<Wait>();
-            //door.GetState("Blow").RemoveAllOfType<Wait>();
-            //door.GetState("Door Off").RemoveAllOfType<Wait>();
-            //door.GetState("Roar").RemoveAllOfType<Wait>();
-            //door.GetState("Roar End").GetAction<Wait>().time = 1;
+            door.GetState("Take Control").RemoveAllOfType<Wait>();
+            door.GetState("Shake").GetAction<Wait>().time = 1;
+            door.GetState("Barrier Flash").RemoveAllOfType<Wait>();
+            door.GetState("Blow").RemoveAllOfType<Wait>();
+            door.GetState("Door Off").RemoveAllOfType<Wait>();
+            door.GetState("Roar").RemoveAllOfType<Wait>();
+            door.GetState("Roar End").GetAction<Wait>().time = 1;
         }
 
         private static IEnumerator OnBeginSceneTransition(On.GameManager.orig_BeginSceneTransitionRoutine orig, GameManager self, GameManager.SceneLoadInfo info)

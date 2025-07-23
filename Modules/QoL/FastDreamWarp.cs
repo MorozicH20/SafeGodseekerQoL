@@ -1,5 +1,6 @@
 //using SafeGodseekerQoL.Modules.GodseekerMode;
-
+using Satchel;
+using Satchel.Futils;
 using Osmi.FsmActions;
 
 namespace SafeGodseekerQoL.Modules.QoL;
@@ -16,7 +17,7 @@ public sealed class FastDreamWarp : Module {
 	public FastDreamWarp() =>
 		On.PlayMakerFSM.Start += ModifyDreamNailFSM;
 
-	private static bool ShouldActivate() => BossSceneController.IsBossScene
+	private static bool ShouldActivate() => true /*BossSceneController.IsBossScene*/
 		/*|| ColosseumOfFools.IsInGodseekerColosseum*/;
 
 	private void ModifyDreamNailFSM(On.PlayMakerFSM.orig_Start orig, PlayMakerFSM self) {

@@ -1,3 +1,5 @@
+using Satchel;
+using Satchel.Futils;
 namespace SafeGodseekerQoL.Modules.BossChallenge;
 
 public sealed class ForceGreyPrinceEnterType : Module {

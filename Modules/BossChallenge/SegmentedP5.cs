@@ -1,4 +1,5 @@
-﻿using Satchel.Reflected;
+﻿using Satchel;
+using Satchel.Futils;
 using UnityEngine.UI;
 
 namespace SafeGodseekerQoL.Modules.BossChallenge
@@ -6,6 +7,7 @@ namespace SafeGodseekerQoL.Modules.BossChallenge
     public sealed class SegmentedP5 : Module
     {
         private const string dummySeqPD = "bossDoorStateTier5Segmented";
+
 
         private static readonly (int start, int end)[] segments = [
             (0, 10),
@@ -42,7 +44,7 @@ namespace SafeGodseekerQoL.Modules.BossChallenge
         private static Text? selectBtnText;
 
         private static string CurrentSegmentName =>
-            $"SegmentedP5/Segment/{selectedP5Segment}";
+            $"SegmentedP5/Segment/{selectedP5Segment}".Localize();
 
 
         private protected override void Load()

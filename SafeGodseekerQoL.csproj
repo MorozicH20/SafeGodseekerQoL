@@ -53,6 +53,9 @@
 		<WriteLinesToFile File="$(ExportDir)/$(TargetName)/SHA.txt" Lines="$(OutputFileString);@(FilesWithHashes->'%(FileHash)');$(OutputZipString);@(ZipFilesWithHashes->'%(FileHash)')" Overwrite="true" Encoding="UTF-8" />
 	</Target>
 	<ItemGroup>
+	  <None Remove="Resources\Lang\en.json" />
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Include="Assembly-CSharp">
 			<HintPath>$(HollowKnightRefs)/Assembly-CSharp.dll</HintPath>
 		</Reference>
@@ -336,7 +339,6 @@
 	<ItemGroup>
 		<None Include=".gitignore" />
 		<None Include="ReadMe.md" />
-		<None Include="Resources\.gitignore" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -350,6 +352,10 @@
 		<PackageReference Include="Fody" Version="6.9.2" PrivateAssets="all" />
 		<PackageReference Include="InfoOf.Fody" Version="2.2.0" PrivateAssets="all" />
 		<PackageReference Include="HKReflect.Fody" Version="0.2.0" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Lang\en.json" />
 	</ItemGroup>
 
 </Project>

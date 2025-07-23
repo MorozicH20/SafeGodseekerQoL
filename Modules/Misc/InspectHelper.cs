@@ -30,11 +30,11 @@ internal sealed class InspectHelper : Module {
 		public static GlobalSettings GlobalSettings => Setting.Global;
 		public static LocalSettings LocalSettings => Setting.Local;
 
-		//public static Dict Dict => L11nUtil.dict;
+		public static Dict Dict => L11nUtil.dict;
 
 		void Awake() => test = new();
 
-		//public static string Localize(string key) => L11nUtil.Localize(key);
+		public static string Localize(string key) => L11nUtil.Localize(key);
 
 		public static void KillAllSafe() => FindObjectsOfType<HealthManager>()
 			.Filter(EnemyDetector.IsValidEnemy)

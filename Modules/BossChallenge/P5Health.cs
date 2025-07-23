@@ -1,5 +1,5 @@
 using MonoMod.RuntimeDetour;
-
+using Satchel;
 namespace SafeGodseekerQoL.Modules.BossChallenge;
 
 public sealed class P5Health : Module {
