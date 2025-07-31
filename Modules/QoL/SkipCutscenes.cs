@@ -52,6 +52,14 @@ namespace SafeGodseekerQoL.Modules.QoL
 
         [GlobalSetting]
         [BoolOption]
+        public static bool GreyPrinceZote = true;
+
+        [GlobalSetting]
+        [BoolOption]
+        public static bool Collector = true;
+
+        [GlobalSetting]
+        [BoolOption]
         public static bool FirstTimeBosses = true;
 
         [GlobalSetting]
@@ -113,12 +121,16 @@ namespace SafeGodseekerQoL.Modules.QoL
             (() => AbsoluteRadiance, AbsRadSkip),
             (() => PureVesselRoar, HKPrimeSkip),
             (() => GrimmNightmare, GrimmNightmareSkip),
+            (() => GreyPrinceZote, GreyPrinceZoteSkip),
+            (() => Collector, CollectorSkip),
             (() => HallOfGodsStatues, StatueWait),
             (() => StagArrive, StagCutscene),
             (() => AbyssShriekGet, AbyssShriekPickup),
             (() => AfterKingsBrandGet, KingsBrand),
             (() => BlackEggOpen, BlackEgg)
         };
+
+
 
         private static readonly string[] PD_BOOLS =
         {
@@ -279,7 +291,7 @@ namespace SafeGodseekerQoL.Modules.QoL
 
             PlayMakerFSM control = GameObject.Find("Grimm Control").LocateMyFSM("Control");
 
-            if (control.gameObject.name == "Grimm Control" && control.FsmName == "Control")
+            if (control != null)
             {
                 control.GetState("Pause").GetAction<Wait>().time.Value = 0.5f;
                 control.GetState("Pan Over").GetAction<Wait>().time.Value = 0.5f;
@@ -302,6 +314,52 @@ namespace SafeGodseekerQoL.Modules.QoL
             }
 
         }
+
+        private static IEnumerator CollectorSkip(Scene scene)
+        {
+            if (!scene.name.Contains("GG_Collector")) yield break;
+
+            yield return null;
+
+            PlayMakerFSM control = GameObject.Find("Jar Collector").LocateMyFSM("Control");
+
+            if (control != null)
+            {
+                control.GetState("Roar").GetAction<Wait>().time.Value = 0.5f;
+                control.GetState("Roar").RemoveAction(6);
+                control.GetState("Roar").RemoveAction(7);
+            }
+        }
+
+        private static IEnumerator GreyPrinceZoteSkip(Scene scene)
+        {
+            if (scene.name != "GG_Grey_Prince_Zote") yield break;
+
+            yield return null;
+
+            PlayMakerFSM control = GameObject.Find("Grey Prince Title").LocateMyFSM("Control");
+
+            if (control != null)
+            {
+                control.GetState("Get Level").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Main Title Pause").GetAction<Wait>().time.Value = 0.1f;
+                control.GetState("Main Title").GetAction<Wait>().time.Value = 0.5f;
+                control.GetState("Extra 1").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 2").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 3").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 4").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 5").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 6").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 7").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 8").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 9").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 10").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 11").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 12").GetAction<Wait>().time.Value = 0.01f;
+                control.GetState("Extra 13").GetAction<Wait>().time.Value = 0.01f;
+            }
+        }
+
         private static IEnumerator AbsRadSkip(Scene arg1)
         {
             if (arg1.name != "GG_Radiance") yield break;
