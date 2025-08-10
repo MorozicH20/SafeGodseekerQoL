@@ -1,4 +1,5 @@
 using SafeGodseekerQoL.Modules.QoL;
+using SafeGodseekerQoL;
 
 namespace SafeGodseekerQoL.Modules.Misc;
 
@@ -29,13 +30,19 @@ internal sealed class BossChallengeUIEdit : Module
 
         BossStatue.Completion completion = statue.UsingDreamVersion ? statue.DreamStatueState : statue.StatueState;
 
-        invokeOrig();
+        if (ModuleManager.IsModuleLoaded<UnlockRadiant>())
+        {
+            UnlockRadiant.Unlock(invokeOrig, statue, ref completion);
+        }
+        else
+        {
+            invokeOrig();
+        }
 
-
-        //if (ModuleManager.IsModuleLoaded<CompleteLowerDifficulty>())
-        //{
-        //	CompleteLowerDifficulty.Complete(statue.name, ref completion);
-        //}
+        if (ModuleManager.IsModuleLoaded<CompleteLowerDifficulty>())
+        {
+            CompleteLowerDifficulty.Complete(statue.name, ref completion);
+        }
 
         SetStatueCompletion(statue, completion);
 
